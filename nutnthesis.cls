@@ -343,14 +343,14 @@
   \newcommand{\nutn@degree@en}{Master}
   \newcommand{\nutn@type}{論文}
   \newcommand{\nutn@type@en}{Thesis}
-}
+}{}
 
 \ifthenelse{\equal{\nutn@degreeset}{doctor}}{
   \newcommand{\nutn@degree}{博士}
   \newcommand{\nutn@degree@en}{Doctoral}
   \newcommand{\nutn@type}{論文}
   \newcommand{\nutn@type@en}{Dissertation}
-}
+}{}
 
 \ifthenelse{\equal{\nutn@language}{chinese}}{
   % 設定中文
@@ -376,7 +376,7 @@
   \newcommand{\nutn@tocsecnumwidth}{\nutn@tocsecnumwidth@zh}
   \newcommand{\nutn@tocsubsecindent}{\nutn@tocsubsecindent@zh}
   \newcommand{\nutn@tocsubsecnumwidth}{\nutn@tocsubsecnumwidth@zh}
-}
+}{}
 
 \ifthenelse{\equal{\nutn@language}{english}}{
   % 設定英文
@@ -402,7 +402,7 @@
   \newcommand{\nutn@tocsecnumwidth}{\nutn@tocsecnumwidth@en}
   \newcommand{\nutn@tocsubsecindent}{\nutn@tocsubsecindent@en}
   \newcommand{\nutn@tocsubsecnumwidth}{\nutn@tocsubsecnumwidth@en}
-}
+}{}
 
 % --------------------------------------------------
 % 06 載入套件 (Include Packages)
@@ -759,7 +759,7 @@
           \vspace{5pt}
           \fontsize{18}{27}\selectfont
           (\nutn@draft)\par
-        }
+        }{}
 
         % 中文論文題目 (18pt)
         \vfill
