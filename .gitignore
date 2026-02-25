@@ -1,0 +1,32 @@
+# LaTeX Build Artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.gz
+*.fdb_latexmk
+*.synctex
+*.synctex.gz
+*.bbl
+*.blg
+*.xdv
+
+# Font Files
+*.ttf
+*.otf
+
+# Editor Directories
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# PDF (Default ignore)
+*.pdf
+
+# Exceptions
+!frontpages/verification.pdf

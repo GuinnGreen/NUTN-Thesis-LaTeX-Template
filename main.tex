@@ -1,0 +1,65 @@
+\documentclass[
+  degree    = master,                       % degree   = master  | doctor
+  language  = chinese,                      % language = chinese | english
+  fontset   = template,                     % fontset  = default | template
+%   draft                                   % LaTex draft mode (images will change to box)
+]{nutnthesis}
+
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% !  注意：論文標題、作者、指導教授等資訊，請至 nutnsetup.tex 修改      !
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+%
+\input{nutnsetup}
+
+\begin{document}
+	% 加入浮水印 Watermark
+	% 浮水印須出現在封面和論文本文第一頁
+	%
+	\makewatermark{watermark}                         % 加入浮水印（Watermark）
+
+	% 封面 Cover（附件一）
+	% 若需要在封面加上（初稿）字樣，請在\makecover後加上{draft}
+	%
+	% \makecover{draft}                               % 有（初稿）字樣的論文封面
+	\makecover                                        % 論文封面（Cover）
+
+	% 書名頁 Title Page（附件二）
+	\maketitlepage                                    % 書名頁（Title Page）
+
+	% 口試審定 Verification Letter（附件四）
+	% \makeverification會生成空白的審定書
+	% 若有審定書pdf檔案，可用\renderverification{檔案路徑}渲染審定書
+	%
+	% \makeverification                                 % 口試委員審定書（空白版）
+	\renderverification{frontpages/verification}      % 渲染口試委員審定書（Render Verification Letter）
+
+	% 中英文摘要 Abstract（附件六、附件七）
+	\frontmatter
+	\input{frontpages/abstract}                       % 摘要（Abstract）
+
+	% 謝辭 Acknowledgement（附件十六）
+	% 台南大學規範：謝辭置於摘要之後
+	\input{frontpages/acknowledgement}                % 謝辭（Acknowledgement）
+
+	% 生成目錄與符號列表 Tables of Contents and Denotation
+	\maketableofcontents                              % 目次（Table of Contents）
+	\makelistoftables                                 % 表次（List of Tables）
+	\makelistoffigures                                % 圖次（List of Figures）
+	\input{frontpages/denotation}                     % 符號說明（Denotation）
+
+	% 論文內容 Contents of Thesis
+	\mainmatter
+	\input{sections/01introduction}                   % 緒論（Introduction）
+	\input{sections/02related_work}                   % 文獻探討（Related Work）
+	\input{sections/03method}                         % 研究方法（Method）
+	\input{sections/04experiments}                    % 研究結果（Experiments）
+	\input{sections/05conclusion}                     % 結論（Conclusion）
+
+	% 參考文獻 References
+	\refmatter
+	\bibliographystyle{apalike}                       % 參考文獻格式：APA（教育學院）
+	\bibliography{backpages/references}               % 參考文獻資料庫（References Database）
+
+	% 附錄 Appendix
+	\input{backpages/appendix}                        % 附錄（Appendix）
+\end{document}

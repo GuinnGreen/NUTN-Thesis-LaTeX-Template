@@ -1,0 +1,17 @@
+{
+  "name": "CCU Thesis LaTeX Env",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "James-Yu.latex-workshop",      // 必裝：LaTeX 編譯核心
+        "tecosaur.latex-utilities",     // 選裝：LaTeX 工具集
+        "eamodio.gitlens",              // 選裝：版控神器
+        "yzhang.markdown-all-in-one"    // 選裝：寫文件用
+      ]
+    }
+  },
+  "remoteUser": "vscode"
+}

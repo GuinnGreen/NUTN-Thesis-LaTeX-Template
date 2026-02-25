@@ -1,0 +1,156 @@
+name: Build NUTN Thesis PDF
+
+on:
+  push:
+    branches: [ "master", "main", "dev" ]
+    tags: [ 'v*' ]
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+      - '.gitignore'
+  pull_request:
+    branches: [ "master", "main" ]
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+  workflow_dispatch:
+
+jobs:
+  # ---------------------------------------------------------
+  # Job 1: 判斷要編譯哪些版本 (動態矩陣生成)
+  # ---------------------------------------------------------
+  check_config:
+    runs-on: ubuntu-latest
+    outputs:
+      # 將產生的 JSON 輸出給下一個 Job 使用
+      degrees: ${{ steps.set-matrix.outputs.degrees }}
+      languages: ${{ steps.set-matrix.outputs.languages }}
+      modes: ${{ steps.set-matrix.outputs.modes }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Determine Build Matrix
+        id: set-matrix
+        run: |
+          IS_OFFICIAL_RELEASE=${{ startsWith(github.ref, 'refs/tags/') && github.repository == 'NUTN-Thesis-LaTeX-Template' }}
+
+          if [ "$IS_OFFICIAL_RELEASE" == "true" ]; then
+            echo "🚀 Official Release Detected. Building FULL Matrix..."
+            echo "degrees=['master', 'doctor']" >> $GITHUB_OUTPUT
+            echo "languages=['chinese', 'english']" >> $GITHUB_OUTPUT
+            echo "modes=['final', 'draft']" >> $GITHUB_OUTPUT
+          else
+            echo "🔧 User Build Detected (Push/PR/User-Tag). Parsing main.tex..."
+
+            # 抓取設定
+            PARSED_DEGREE=$(grep -E '^\s*degree\s*=' main.tex | awk -F "=" '{print $2}' | awk -F "," '{print $1}' | tr -d '[:space:]')
+            PARSED_LANG=$(grep -E '^\s*language\s*=' main.tex | awk -F "=" '{print $2}' | awk -F "," '{print $1}' | tr -d '[:space:]')
+
+            # 如果抓不到，就跑預設值 (碩士/中文/Final)
+            if [[ -z "$PARSED_DEGREE" || -z "$PARSED_LANG" ]]; then
+              echo "⚠️ Parse failed! Fallback to default (master/chinese)."
+              PARSED_DEGREE="master"
+              PARSED_LANG="chinese"
+            fi
+
+            # 輸出單一矩陣
+            echo "degrees=['$PARSED_DEGREE']" >> $GITHUB_OUTPUT
+            echo "languages=['$PARSED_LANG']" >> $GITHUB_OUTPUT
+            echo "modes=['final']" >> $GITHUB_OUTPUT
+          fi
+
+  # ---------------------------------------------------------
+  # Job 2: 編譯核心 (依賴 Job 1 的輸出)
+  # ---------------------------------------------------------
+  build_matrix:
+    needs: check_config
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 使用從 check_config 傳過來的動態 JSON
+        degree: ${{ fromJson(needs.check_config.outputs.degrees) }}
+        language: ${{ fromJson(needs.check_config.outputs.languages) }}
+        mode: ${{ fromJson(needs.check_config.outputs.modes) }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ---------------------------------------------------------
+      # 1. 動態修改參數
+      # ---------------------------------------------------------
+      - name: Configure main.tex
+        run: |
+          echo "Configuring for: Degree=${{ matrix.degree }}, Lang=${{ matrix.language }}, Mode=${{ matrix.mode }}"
+
+          # 修改學位
+          if [ "${{ matrix.degree }}" == "doctor" ]; then
+            sed -i 's/degree\s*=\s*master/degree    = doctor/' main.tex
+          elif [ "${{ matrix.degree }}" == "master" ]; then
+             sed -i 's/degree\s*=\s*doctor/degree    = master/' main.tex
+          fi
+
+          # 修改語言
+          if [ "${{ matrix.language }}" == "english" ]; then
+            sed -i 's/language\s*=\s*chinese/language  = english/' main.tex
+          elif [ "${{ matrix.language }}" == "chinese" ]; then
+            sed -i 's/language\s*=\s*english/language  = chinese/' main.tex
+          fi
+
+          # 修改 Draft 模式
+          if [ "${{ matrix.mode }}" == "draft" ]; then
+            sed -i 's/%\s*draft/  draft/' main.tex
+          fi
+
+      # ---------------------------------------------------------
+      # 2. 編譯核心
+      # ---------------------------------------------------------
+      - name: Compile LaTeX
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          pre_compile: "mkdir -p ~/.local/share/fonts/ && curl -L -o ~/.local/share/fonts/cwTeXQMing.ttf https://raw.githubusercontent.com/l10n-tw/cwtex-q-fonts-TTFs/master/ttf/cwTeXQMing-Medium.ttf && curl -L -o ~/.local/share/fonts/cwTeXQKai.ttf https://raw.githubusercontent.com/l10n-tw/cwtex-q-fonts-TTFs/master/ttf/cwTeXQKai-Medium.ttf && fc-cache -fv"
+          # 使用 -jobname 避免檔名衝突，並強制使用 xelatex
+          args: >
+            -jobname=${{ matrix.degree }}_${{ matrix.language }}_${{ matrix.mode }}
+            -xelatex
+            -file-line-error
+            -halt-on-error
+            -interaction=nonstopmode
+
+      # ---------------------------------------------------------
+      # 3. 上傳產物 (供 Release 或 Debug 用)
+      # ---------------------------------------------------------
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.degree }}-${{ matrix.language }}-${{ matrix.mode }}
+          path: "*.pdf"
+          retention-days: 5
+
+  # ---------------------------------------------------------
+  # Release Job (只有打 Tag 時才會執行)
+  # ---------------------------------------------------------
+  release:
+    needs: build_matrix
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true # 將所有矩陣產生的 PDF 合併到同一資料夾
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artifacts/*.pdf
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
