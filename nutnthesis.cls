@@ -338,21 +338,19 @@
 
 % 根據設定值賦值變數
 % Assign variables according to configs.
-\ifthenelse{\equal{\nutn@degreeset}{master}}{
+\ifnutn@degreeset@master
   \newcommand{\nutn@degree}{碩士}
   \newcommand{\nutn@degree@en}{Master}
   \newcommand{\nutn@type}{論文}
   \newcommand{\nutn@type@en}{Thesis}
-}{}
-
-\ifthenelse{\equal{\nutn@degreeset}{doctor}}{
+\else
   \newcommand{\nutn@degree}{博士}
   \newcommand{\nutn@degree@en}{Doctoral}
   \newcommand{\nutn@type}{論文}
   \newcommand{\nutn@type@en}{Dissertation}
-}{}
+\fi
 
-\ifthenelse{\equal{\nutn@language}{chinese}}{
+\ifnutn@language@chinese
   % 設定中文
   \newcommand{\nutn@titlesection}{\nutn@titlesection@zh}
   \newcommand{\nutn@titlesectiontoc}{\nutn@titlesectiontoc@zh}
@@ -376,9 +374,7 @@
   \newcommand{\nutn@tocsecnumwidth}{\nutn@tocsecnumwidth@zh}
   \newcommand{\nutn@tocsubsecindent}{\nutn@tocsubsecindent@zh}
   \newcommand{\nutn@tocsubsecnumwidth}{\nutn@tocsubsecnumwidth@zh}
-}{}
-
-\ifthenelse{\equal{\nutn@language}{english}}{
+\else
   % 設定英文
   \newcommand{\nutn@titlesection}{\nutn@titlesection@en}
   \newcommand{\nutn@titlesectiontoc}{\nutn@titlesectiontoc@en}
@@ -402,7 +398,7 @@
   \newcommand{\nutn@tocsecnumwidth}{\nutn@tocsecnumwidth@en}
   \newcommand{\nutn@tocsubsecindent}{\nutn@tocsubsecindent@en}
   \newcommand{\nutn@tocsubsecnumwidth}{\nutn@tocsubsecnumwidth@en}
-}{}
+\fi
 
 % --------------------------------------------------
 % 06 載入套件 (Include Packages)
@@ -565,15 +561,13 @@
 
 % --- 實際套用設定 ---
 %
-\ifthenelse{\equal{\nutn@fontset}{default}}{
-  \nutn@setmainfont
-  \nutn@setcjkfont{2.5}
-}{}
-
-\ifthenelse{\equal{\nutn@fontset}{template}}{
+\ifnutn@fontset@template
   \nutn@setmainfont
   \nutn@setcjkfont{4}
-}{}
+\else
+  \nutn@setmainfont
+  \nutn@setcjkfont{2.5}
+\fi
 
 % [版面大小]
 % 台南大學規範：左3cm、右2cm、上下2.5cm（單面印刷）
@@ -731,7 +725,7 @@
 % [生成封面]
 % Generate the cover page (依台南大學附件一格式)
 %
-\newcommand{\makecover}[1]{
+\newcommand{\makecover}[1][]{
   \nutn@setgeometry{\nutn@geometry@cover}
 
   \begin{titlepage}
@@ -861,7 +855,7 @@
         % 內文 (16pt)
         \fontsize{16}{30}\selectfont
         \begin{flushleft}
-          本校~\nutn@institute~\nutn@degree士班~\nutn@author~君\par
+          本校~\nutn@institute~\nutn@degree班~\nutn@author~君\par
           所提之論文:\par
           \underline{\hspace{\textwidth}}\par
           \underline{\nutn@title}\par
