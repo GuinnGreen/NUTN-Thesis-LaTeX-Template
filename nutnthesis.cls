@@ -1122,7 +1122,7 @@
     \nutn@title@en\par
     \vspace{0.5cm}
     \fontsize{12}{18}\selectfont
-    Student\uff1a\nutn@author@en\hspace{2cm}Advisor(s)\uff1a\nutn@advisor@en\par
+    Student：\nutn@author@en\hspace{2cm}Advisor(s)：\nutn@advisor@en\par
     \vspace{0.3cm}
     \nutn@institute@en, \nutn@university@en\par
   \end{center}
