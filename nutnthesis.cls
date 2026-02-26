@@ -338,19 +338,19 @@
 
 % 根據設定值賦值變數
 % Assign variables according to configs.
-\ifnutn@degreeset@master
+\ifthenelse{\equal{\nutn@degreeset}{master}}{
   \newcommand{\nutn@degree}{碩士}
   \newcommand{\nutn@degree@en}{Master}
   \newcommand{\nutn@type}{論文}
   \newcommand{\nutn@type@en}{Thesis}
-\else
+}{
   \newcommand{\nutn@degree}{博士}
   \newcommand{\nutn@degree@en}{Doctoral}
   \newcommand{\nutn@type}{論文}
   \newcommand{\nutn@type@en}{Dissertation}
-\fi
+}
 
-\ifnutn@language@chinese
+\ifthenelse{\equal{\nutn@language}{chinese}}{
   % 設定中文
   \newcommand{\nutn@titlesection}{\nutn@titlesection@zh}
   \newcommand{\nutn@titlesectiontoc}{\nutn@titlesectiontoc@zh}
@@ -374,7 +374,7 @@
   \newcommand{\nutn@tocsecnumwidth}{\nutn@tocsecnumwidth@zh}
   \newcommand{\nutn@tocsubsecindent}{\nutn@tocsubsecindent@zh}
   \newcommand{\nutn@tocsubsecnumwidth}{\nutn@tocsubsecnumwidth@zh}
-\else
+}{
   % 設定英文
   \newcommand{\nutn@titlesection}{\nutn@titlesection@en}
   \newcommand{\nutn@titlesectiontoc}{\nutn@titlesectiontoc@en}
@@ -398,7 +398,7 @@
   \newcommand{\nutn@tocsecnumwidth}{\nutn@tocsecnumwidth@en}
   \newcommand{\nutn@tocsubsecindent}{\nutn@tocsubsecindent@en}
   \newcommand{\nutn@tocsubsecnumwidth}{\nutn@tocsubsecnumwidth@en}
-\fi
+}
 
 % --------------------------------------------------
 % 06 載入套件 (Include Packages)
@@ -540,20 +540,32 @@
 % 台南大學規定：中文字體以新細明體為原則
 % 參數 #1: 粗體加重程度
 \newcommand{\nutn@setcjkfont}[1]{
-  \IfFontExistsTF{PMingLiU}{
-    % 情況 1: Windows (新細明體)
-    \setCJKmainfont{PMingLiU}[AutoFakeBold=#1, AutoFakeSlant=.2]
-  }{
-    \IfFontExistsTF{LiSong Pro}{
-      % 情況 2: Mac (儷宋 Pro，類新細明體)
-      \setCJKmainfont{LiSong Pro}[AutoFakeBold=#1, AutoFakeSlant=.2]
+  % 透過檢查 /proc/meminfo 來判定是否為 Linux (CI 環境)
+  \IfFileExists{/proc/meminfo}{
+    % 情況 A: CI 環境 (Linux)
+    % 避免觸發 mktextfm 導致 latexmk 誤判編譯錯誤，直接採用開源字體
+    \IfFontExistsTF{cwTeX Q Ming}{
+      \setCJKmainfont{cwTeX Q Ming}[AutoFakeBold=#1, AutoFakeSlant=.2]
     }{
-      \IfFontExistsTF{Songti SC}{
-        % 情況 3: Mac (宋體-簡，備選)
-        \setCJKmainfont{Songti SC}[AutoFakeBold=#1, AutoFakeSlant=.2]
+      \setCJKmainfont{FandolSong}[AutoFakeBold=#1, AutoFakeSlant=.2]
+    }
+  }{
+    % 情況 B: 本地環境 (Mac / Windows)
+    \IfFontExistsTF{PMingLiU}{
+      % 情況 B-1: Windows (新細明體)
+      \setCJKmainfont{PMingLiU}[AutoFakeBold=#1, AutoFakeSlant=.2]
+    }{
+      \IfFontExistsTF{LiSong Pro}{
+        % 情況 B-2: Mac (儷宋 Pro，類新細明體)
+        \setCJKmainfont{LiSong Pro}[AutoFakeBold=#1, AutoFakeSlant=.2]
       }{
-        % 情況 4: CI 環境 (GitHub Actions) - 使用 cwTeX Q Ming
-        \setCJKmainfont{cwTeX Q Ming}[AutoFakeBold=#1, AutoFakeSlant=.2]
+        \IfFontExistsTF{Songti SC}{
+          % 情況 B-3: Mac (宋體-簡，備選)
+          \setCJKmainfont{Songti SC}[AutoFakeBold=#1, AutoFakeSlant=.2]
+        }{
+          % 情況 B-4: 本地找不到系統字體的 Fallback
+          \setCJKmainfont{cwTeX Q Ming}[AutoFakeBold=#1, AutoFakeSlant=.2]
+        }
       }
     }
   }
@@ -561,13 +573,13 @@
 
 % --- 實際套用設定 ---
 %
-\ifnutn@fontset@template
+\ifthenelse{\equal{\nutn@fontset}{template}}{
   \nutn@setmainfont
   \nutn@setcjkfont{4}
-\else
+}{
   \nutn@setmainfont
   \nutn@setcjkfont{2.5}
-\fi
+}
 
 % [版面大小]
 % 台南大學規範：左3cm、右2cm、上下2.5cm（單面印刷）
