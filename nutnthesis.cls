@@ -867,11 +867,11 @@
         % 內文 (16pt)
         \fontsize{16}{30}\selectfont
         \begin{flushleft}
-          本校~\nutn@institute~\nutn@degree班~\nutn@author~君\par
+          本校~\nutn@institute~\nutn@degree{}班~\nutn@author~君\par
           所提之論文:\par
           \underline{\hspace{\textwidth}}\par
           \underline{\nutn@title}\par
-          經本委員會審查，符合\nutn@degree學位論文標準。
+          經本委員會審查，符合\nutn@degree{}學位論文標準。
         \end{flushleft}
       \end{center}
     \end{singlespace}
